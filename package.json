@@ -1,6 +1,7 @@
 {
     "name": "@handshake/promised-list",
     "version": "0.0.1",
+    "description": "Underscore meets Promises",
     "author": "Kevan Davis <kevan.davis@handshake.com>",
     "license": "UNLICENSED",
     "keywords": [
@@ -14,11 +15,28 @@
     "bugs": {
         "url": "https://github.com/handshake/promised-list/issues"
     },
+    "scripts": {
+        "doc": "rm -rf docs && jsdoc -r src/index.js -d docs -R README.md -c jsdoc.json",
+        "build": "babel src -o index.js && uglifyjs -c -o index.min.js -- index.js",
+        "test": "karma start"
+    },
     "devDependencies": {
-        "babel-core": "6.7.x",
+        "babel-cli": "6.9.x",
+        "babel-eslint": "6.0.x",
         "babel-preset-es2015": "6.6.x",
+        "babelify": "7.2.x",
+        "browserify": "13.0.x",
+        "chai-as-promised": "5.3.x",
         "eslint": "2.7.x",
         "eslint-config-airbnb": "7.0.x",
+        "jsdoc": "3.4.x",
+        "karma": "0.13.x",
+        "karma-browserify": "5.0.x",
+        "karma-chrome-launcher": "1.0.x",
+        "karma-mocha": "0.2.x",
+        "karma-mocha-reporter": "2.0.x",
+        "sinon-chai": "2.8.x",
+        "uglify-js": "2.6.x"
     },
     "engines": {
         "node": ">=4.2.4",
