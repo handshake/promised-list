@@ -17,7 +17,7 @@
     },
     "scripts": {
         "doc": "rm -rf docs && jsdoc -r src/index.js -d docs -R README.md -c jsdoc.json",
-        "build": "babel src -o index.js && uglifyjs -c -o index.min.js -- index.js",
+        "build": "babel src --plugin=transform-es2015-modules-umd -o index.js && uglifyjs -c -o index.min.js -- index.js",
         "test": "karma start"
     },
     "devDependencies": {
