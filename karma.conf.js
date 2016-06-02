@@ -3,7 +3,9 @@ module.exports = (config) => {
         basePath: process.cwd(),
         browserify: {
             debug: true,
-            transform: ["babelify"],
+            transform: [["babelify", {
+                presets: ["es2015"],
+            }]],
         },
         browsers: [
             "Chrome",
