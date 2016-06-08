@@ -116,4 +116,96 @@ describe("PromisedList", () => {
                 .should.eventually.be.false,
         ])
     );
+
+    it("should have a `pop` method", () => {
+        const p1 = Promise.resolve(1);
+        const p2 = Promise.resolve(2);
+
+        const pl = new PromisedList([p1, p2]);
+        pl.length.should.equal(2);
+
+        pl.pop().should.equal(p2);
+        pl.length.should.equal(1);
+        pl.pop().should.equal(p1);
+        pl.length.should.equal(0);
+    });
+
+    it("should have a `push` method", () => {
+        const pl = new PromisedList();
+        pl.length.should.equal(0);
+
+        const p1 = Promise.resolve(1);
+        const p2 = Promise.resolve(2);
+        pl.push(p1).should.equal(1);
+        pl.length.should.equal(1);
+        pl.push(p2).should.equal(2);
+        pl.length.should.equal(2);
+
+        pl.at(0).should.equal(p1);
+        pl.at(1).should.equal(p2);
+    });
+
+    it("should have a `shift` method", () => {
+        const p1 = Promise.resolve(1);
+        const p2 = Promise.resolve(2);
+
+        const pl = new PromisedList([p1, p2]);
+        pl.length.should.equal(2);
+
+        pl.shift().should.equal(p1);
+        pl.length.should.equal(1);
+        pl.shift().should.equal(p2);
+        pl.length.should.equal(0);
+    });
+
+    it("should have an `unshift` method", () => {
+        const pl = new PromisedList();
+        pl.length.should.equal(0);
+
+        const p1 = Promise.resolve(1);
+        const p2 = Promise.resolve(2);
+        pl.unshift(p1).should.equal(1);
+        pl.length.should.equal(1);
+        pl.unshift(p2).should.equal(2);
+        pl.length.should.equal(2);
+
+        pl.at(0).should.equal(p2);
+        pl.at(1).should.equal(p1);
+    });
+
+    it("should have a `toArray` method", () =>
+        new PromisedList([
+            Promise.resolve(1),
+            Promise.resolve(2),
+        ]).toArray().should.eventually.deep.equal([1, 2])
+    );
+
+    it("should have a `toString` method", () =>
+        new PromisedList([
+            Promise.resolve(1),
+            Promise.resolve(2),
+        ]).toString().should.equal("PromisedList{length=2}")
+    );
+
+    it("should have a `toJSON` method", () =>
+        new PromisedList([
+            Promise.resolve(1),
+            Promise.resolve(2),
+        ]).toJSON().should.deep.equal({ length: 2 })
+    );
+
+    it("should have a `toStringTag` symbol", () => {
+        const pl = new PromisedList();
+        Object.prototype.toString.call(pl).should.equal("[object PromisedList]");
+    });
+
+    it("should have a `toPrimitive` symbol", () => {
+        const pl = new PromisedList([
+            Promise.resolve(1),
+            Promise.resolve(2),
+        ]);
+        (`${pl}`).should.equal("PromisedList{length=2}");
+        (+pl).should.equal(2);
+        // (pl + "").should.deep.equal("{ length: 2 }"); // FAILS in Chrome & Firefox
+    });
 });

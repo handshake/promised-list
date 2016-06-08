@@ -1,4 +1,14 @@
 /* JSDoc Definitions */
+
+/**
+ * @callback PromisedList~internalCallback
+ * @param  {Object}   obj
+ * @param  {Model}    obj.item - The current item.
+ * @param  {Integer}  obj.index - Index of the current item.
+ * @param  {Function} obj.stop - Call this to stop iteration
+ */
+
+
 /**
  * @callback PromisedList~eachCallback
  * @param  {Model}    item - The current item.
@@ -33,9 +43,14 @@
  */
 class PromisedList {
     constructor (list) {
-        this.__list__ = list;
+        this.__list__ = list || [];
     }
 
+    /**
+     * Return the current length of the internal list.
+     *
+     * @return {Number}
+     */
     get length () {
         return this.__list__.length;
     }
@@ -43,7 +58,8 @@ class PromisedList {
     /**
      * Helper method for the `each`, `map` and `reduce` methods below.
      *
-     * @param  {Function}  callback
+     * @private
+     * @param  {PromisedList~internalCallback}  callback
      * @return {Promise.<Mixed[]>}
      */
     __each__ (callback) {
@@ -83,30 +99,70 @@ class PromisedList {
         });
     }
 
-    // TODO: tests and docs for push/pop/shift/unshift & toArray
-
+    /**
+     * Removes the last promise from the list and returns it.
+     *
+     * @return {Promise.<Mixed>}
+     *
+     * @example
+     * const myPromise = myList.pop();
+     */
     pop () {
         const result = this.at(this.length - 1); // use .at so result gets wrapped properly
         this.__list__.pop();
         return result;
     }
 
+    /**
+     * Appends the list with one or more promises.
+     *
+     * @param  {...Promise}  items - Promises to be appended.
+     * @return {Number}              New length of the list.
+     *
+     * @example
+     * lines.push(aNewLinePromise, anotherNewLinePromise);
+     */
     push (...items) {
         this.__list__.push(...items);
         return this.length;
     }
 
+    /**
+     * Removes the first promise from the list and returns it.
+     *
+     * @return {Promise.<Mixed>}
+     *
+     * @example
+     * const myPromise = myList.shift();
+     */
     shift () {
         const result = this.at(0); // use .at so result gets wrapped properly
         this.__list__.shift();
         return result;
     }
 
+    /**
+     * Prepends the list with one or more promises.
+     *
+     * @param  {...Promise}  items - Promises to be prepended.
+     * @return {Number}              New length of the list.
+     *
+     * @example
+     * lines.unshift(aNewLinePromise, anotherNewLinePromise);
+     */
     unshift (...items) {
         this.__list__.unshift(...items);
         return this.length;
     }
 
+    /**
+     * Resolves with an array of each item.
+     *
+     * @return {Promise.<Mixed[]>}
+     *
+     * @example
+     * lines.toArray().then(arrayOfLines => { ... });
+     */
     toArray () {
         return this.__each__(obj => obj.item);
     }
@@ -314,6 +370,33 @@ class PromisedList {
     }
 
     /**
+     * Returns a string representation of this PromisedList.
+     *
+     * @return {String}
+     */
+    toString () {
+        // IDEA: if type of each resolved value is consistent, and known,
+        //       the following would be a better representation:
+        //           `PromisedList<KNOWN_TYPE>{length=${this.length}}`
+        //       however, this requires knowing the type and if it is consistent.
+        return `PromisedList{length=${this.length}}`;
+    }
+
+    /**
+     * Returns a plain object representation of this PromisedList.
+     * Unfortunately, we can't serialize the actual underlying list w/o awaiting it.
+     *
+     * @return {Object}
+     */
+    toJSON () {
+        return {
+            // IDEA: if the type of each resolve value is consistent, and known,
+            //       we could include that type here.
+            length: this.length,
+        };
+    }
+
+    /**
      * Yields Promises for each result.
      * It is recommended that you use the `each` or `map` methods instead, as those will process
      * each result sequentially, instead of all at once.
@@ -346,6 +429,54 @@ class PromisedList {
     //         yield this.at(i);
     //     }
     // }
+
+    // With generators, and async/await, we can add the following:
+    // @see https://github.com/tc39/proposal-async-iteration
+    // async *[Symbol.asyncIterator] () {
+    //     for (let i = 0; i < this.length; i += 1) {
+    //         yield await this.at(i);
+    //     }
+    // }
+
+    /**
+     * This symbol is used by the default `Object.toString()` method, and will result in
+     * `[object PromisedList]`.
+     *
+     * @see http://blog.keithcirkel.co.uk/metaprogramming-in-es6-symbols/#symboltostringtag
+     *
+     * @return {String}
+     */
+    get [Symbol.toStringTag] () {
+        return "PromisedList";
+    }
+
+    /**
+     * This symbol is used when trying to coerce this object into another type.
+     * If you try to cast a PromisedList as a string, e.g. `"" + myList`,
+     * you'll get a string representation of the list, and if you try to cast it as a number,
+     * e.g. `+myList`, you'll get the length of the list, and if you try to cast it some other way,
+     * you'll get the json representation, e.g. `myList + ""`
+     *
+     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toPrimitive
+     *
+     * @param  {String}  hint  One of "string", "number", or "default"
+     * @return {Mixed}
+     */
+    [Symbol.toPrimitive] (hint) {
+        if (hint === "string") {
+            return this.toString();
+        } else if (hint === "number") {
+            return this.length;
+        }
+
+        // disabled because both Chrome & Firefox are sending "default"
+        // as a hint when their docs say they should be sending "string",
+        // so, until this is fixed, I'm going to return a string for the
+        // "default" hint (which is supposed to return a plain object, apparently).
+
+        // return this.toJSON();
+        return this.toString();
+    }
 }
 
 export default PromisedList;
