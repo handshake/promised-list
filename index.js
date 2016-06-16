@@ -42,18 +42,31 @@
     }();
 
     var PromisedList = function () {
-        function PromisedList(list) {
+        /**
+         * @param {Array}     list              An array of Promises.
+         * @param {Function}  [promiseWrapper]  A function which will wrap or decorate a Promise.
+         */
+
+        function PromisedList(list, promiseWrapper) {
             _classCallCheck(this, PromisedList);
 
-            this.__list__ = list;
+            this.__list__ = list || [];
+            this.__promiseWraper__ = promiseWrapper;
         }
+
+        /**
+         * Return the current length of the internal list.
+         *
+         * @return {Number}
+         */
+
 
         _createClass(PromisedList, [{
             key: "__each__",
             value: function __each__(callback) {
                 var _this = this;
 
-                return new Promise(function (resolve, reject) {
+                var promise = new Promise(function (resolve, reject) {
                     var iter = _this[Symbol.iterator]();
                     var i = 0;
                     var result = iter.next();
@@ -89,6 +102,11 @@
                         resolve(returnValues);
                     }
                 });
+
+                if (this.__promiseWraper__) {
+                    return this.__promiseWraper__(promise);
+                }
+                return promise;
             }
         }, {
             key: "pop",
@@ -248,6 +266,24 @@
                 return Promise.resolve(this.__list__[n]);
             }
         }, {
+            key: "toString",
+            value: function toString() {
+                // IDEA: if type of each resolved value is consistent, and known,
+                //       the following would be a better representation:
+                //           `PromisedList<KNOWN_TYPE>{length=${this.length}}`
+                //       however, this requires knowing the type and if it is consistent.
+                return "PromisedList{length=" + this.length + "}";
+            }
+        }, {
+            key: "toJSON",
+            value: function toJSON() {
+                return {
+                    // IDEA: if the type of each resolve value is consistent, and known,
+                    //       we could include that type here.
+                    length: this.length
+                };
+            }
+        }, {
             key: Symbol.iterator,
             value: function value() {
                 var i = 0;
@@ -264,9 +300,31 @@
                 };
             }
         }, {
+            key: Symbol.toPrimitive,
+            value: function value(hint) {
+                if (hint === "string") {
+                    return this.toString();
+                } else if (hint === "number") {
+                    return this.length;
+                }
+
+                // disabled because both Chrome & Firefox are sending "default"
+                // as a hint when their docs say they should be sending "string",
+                // so, until this is fixed, I'm going to return a string for the
+                // "default" hint (which is supposed to return a plain object, apparently).
+
+                // return this.toJSON();
+                return this.toString();
+            }
+        }, {
             key: "length",
             get: function get() {
                 return this.__list__.length;
+            }
+        }, {
+            key: Symbol.toStringTag,
+            get: function get() {
+                return "PromisedList";
             }
         }]);
 
