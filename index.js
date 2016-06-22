@@ -43,15 +43,17 @@
 
     var PromisedList = function () {
         /**
-         * @param {Array}     list              An array of Promises.
-         * @param {Function}  [promiseWrapper]  A function which will wrap or decorate a Promise.
+         * @param {Array}     list               An array of Promises.
+         * @param {Function}  [promiseWrapper]   A function which will wrap or decorate a Promise.
+         * @param {Function}  [callbackWrapper]  A function which will wrap callbacks.
          */
 
-        function PromisedList(list, promiseWrapper) {
+        function PromisedList(list, promiseWrapper, callbackWrapper) {
             _classCallCheck(this, PromisedList);
 
             this.__list__ = list || [];
             this.__promiseWraper__ = promiseWrapper;
+            this.__callbackWrapper__ = callbackWrapper;
         }
 
         /**
@@ -66,6 +68,11 @@
             value: function __each__(callback) {
                 var _this = this;
 
+                var actualCallback = callback;
+                if (this.__callbackWrapper__) {
+                    actualCallback = this.__callbackWrapper__(callback);
+                }
+
                 var promise = new Promise(function (resolve, reject) {
                     var iter = _this[Symbol.iterator]();
                     var i = 0;
@@ -74,7 +81,7 @@
 
                     var wrapper = function wrapper(item) {
                         var stopped = false;
-                        Promise.resolve(callback({
+                        Promise.resolve(actualCallback({
                             item: item,
                             index: i,
                             stop: function stop() {
