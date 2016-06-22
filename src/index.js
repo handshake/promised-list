@@ -179,7 +179,7 @@ class PromisedList {
 
     /**
      * Call the provided function for each result. Resolves when done. Also passes the index of the
-     * current result. Will stop iterating if the callback returns `false`.
+     * current result.
      *
      * @param  {PromisedList~eachCallback}  callback
      * @return {Promise}
@@ -190,13 +190,7 @@ class PromisedList {
      * });
      */
     each (callback) {
-        return this.__each__(obj =>
-            Promise.resolve(callback(obj.item, obj.index)).then(answer => {
-                if (answer === false) {
-                    obj.stop();
-                }
-            })
-        ).then(() => undefined);
+        return this.__each__(obj => callback(obj.item, obj.index)).then(() => undefined);
     }
 
     /**

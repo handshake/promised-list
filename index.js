@@ -149,11 +149,7 @@
             key: "each",
             value: function each(callback) {
                 return this.__each__(function (obj) {
-                    return Promise.resolve(callback(obj.item, obj.index)).then(function (answer) {
-                        if (answer === false) {
-                            obj.stop();
-                        }
-                    });
+                    return callback(obj.item, obj.index);
                 }).then(function () {
                     return undefined;
                 });
