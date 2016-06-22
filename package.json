@@ -1,6 +1,6 @@
 {
     "name": "@handshake/promised-list",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Underscore meets Promises",
     "author": "Kevan Davis <kevan.davis@handshake.com>",
     "license": "UNLICENSED",

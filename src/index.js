@@ -43,12 +43,14 @@
  */
 class PromisedList {
     /**
-     * @param {Array}     list              An array of Promises.
-     * @param {Function}  [promiseWrapper]  A function which will wrap or decorate a Promise.
+     * @param {Array}     list               An array of Promises.
+     * @param {Function}  [promiseWrapper]   A function which will wrap or decorate a Promise.
+     * @param {Function}  [callbackWrapper]  A function which will wrap callbacks.
      */
-    constructor (list, promiseWrapper) {
+    constructor (list, promiseWrapper, callbackWrapper) {
         this.__list__ = list || [];
         this.__promiseWraper__ = promiseWrapper;
+        this.__callbackWrapper__ = callbackWrapper;
     }
 
     /**
@@ -68,6 +70,11 @@ class PromisedList {
      * @return {Promise.<Mixed[]>}
      */
     __each__ (callback) {
+        let actualCallback = callback;
+        if (this.__callbackWrapper__) {
+            actualCallback = this.__callbackWrapper__(callback);
+        }
+
         const promise = new Promise((resolve, reject) => {
             const iter = this[Symbol.iterator]();
             let i = 0;
@@ -76,7 +83,7 @@ class PromisedList {
 
             const wrapper = item => {
                 let stopped = false;
-                Promise.resolve(callback({
+                Promise.resolve(actualCallback({
                     item,
                     index: i,
                     stop: () => { stopped = true; },
